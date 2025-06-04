@@ -1,7 +1,21 @@
 const express=require('express');
 const router=express.Router();
 const userControllers=require("../controllers/user.controller");
+const {authMiddleware,authUserMiddleware}=require("../middleware/auth.middleware");
 
-router.post('/',userControllers.createUser);
+router.post('/sign-up',userControllers.createUser);
+
+router.post('/sign-in',userControllers.loginUser);
+
+router.put('/update-user/:id',userControllers.updateUser);
+
+router.delete('/delete-user/:id',authMiddleware, userControllers.deleteUser);
+
+router.get('/getAll',authMiddleware, userControllers.getAllUser);
+
+router.get('/get-detail/:id',authUserMiddleware,userControllers.getDetailUser);
+
+router.post('/refresh-token',userControllers.refreshToken);
+
 
 module.exports=router;
