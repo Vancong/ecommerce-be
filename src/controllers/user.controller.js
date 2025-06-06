@@ -1,5 +1,5 @@
-const userService=require('../services/user.Services');
-const JwtServices=require("../services/JwtServices");
+const userService=require('../services/user.Service');
+const JwtService=require("../services/JwtService");
 const UserDtb=require("../models/User.Model");
 
 module.exports.index= (req,res) => {
@@ -52,7 +52,7 @@ module.exports.loginUser= async (req,res) =>{
         const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
         
         const isCheckMail=reg.test(email);
-        
+   
         if(!email || !password  ) {
             return res.status(400).json({
                 status: "ERR",
@@ -65,7 +65,7 @@ module.exports.loginUser= async (req,res) =>{
                 message: "Email không hợp lệlệ"
             })
         }
-        
+        console.log('ok');
        
         const user=await userService.loginUser(req.body); 
         return res.status(200).json(user)
@@ -101,7 +101,6 @@ module.exports.deleteUser= async (req,res) =>{
     try {
         const userId=req.params.id;
         const token=req.headers;
-        console.log(token);
         if(!userId) {
             return res.status(400).json({
                 status: 'err',
@@ -153,7 +152,7 @@ module.exports.refreshToken= async (req,res) =>{
                 message: 'Bat buoc can token'
             })
         }
-        const response=await JwtServices.refreshTokenJwtServices(token);
+        const response=await JwtService.refreshTokenJwtServices(token);
         console.log(response);
         return res.status(200).json(response);
     } catch (error) {

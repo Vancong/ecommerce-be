@@ -1,7 +1,7 @@
 
 const UserDtb = require('../models/User.Model');
 const bcrypt=require('bcrypt');
-const JwtServices=require('./JwtServices');
+const JwtService=require('./JwtService');
 
 module.exports.createUser = async (newUser) => {
 
@@ -56,12 +56,12 @@ module.exports.loginUser = async (dataUser) => {
             }
         }
       
-        const access_token=JwtServices.genneralAccessToken({
+        const access_token=JwtService.genneralAccessToken({
             id:checkUser.id,
             IsAdmin: checkUser.IsAdmin
         })
 
-        const refresh_token=JwtServices.genneralRefreshToken({
+        const refresh_token=JwtService.genneralRefreshToken({
             id:checkUser.id,
             IsAdmin: checkUser.IsAdmin
         })
