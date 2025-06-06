@@ -107,14 +107,27 @@ module.exports.deleteProduct= async (id) =>{
     }
 }
 
-module.exports.getAllProduct= async () =>{
+module.exports.getAllProduct= async (page = 1) =>{
     try {
-        const allProduct=await ProductDtb.find();
-        return {
+        const limit=6;
+        const totalProduct= await ProductDtb.countDocuments();
+        const totalPage=Math.ceil(totalProduct/limit);
+        const skipPage=(page-1) *limit;
+        const allProduct=await ProductDtb.find().limit(limit).skip(skipPage);
+        if(allProduct.length>0) {
+            return {
             status: 'OK',
             message: 'Thanh cong',
-            data: allProduct
+            data: allProduct,
+            totalPage: totalPage
+            }
         }
+        
+        return {
+            message: "err"
+        }
+       
+       
     }catch (error) {
           return {
             message: error

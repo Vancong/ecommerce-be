@@ -85,7 +85,8 @@ module.exports.deleteProduct= async (req,res) =>{
 // [GET] /api/product/get-all
 module.exports.getAllProduct= async(req,res) =>{
     try {
-        const response=await ProductService.getAllProduct();
+        const page=parseInt(req.query.page);
+        const response=await ProductService.getAllProduct(page);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(404).json({
