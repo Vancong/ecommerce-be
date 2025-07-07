@@ -7,7 +7,9 @@ router.post('/sign-up',userControllers.createUser);
 
 router.post('/sign-in',userControllers.loginUser);
 
-router.put('/update-user/:id',userControllers.updateUser);
+router.post('/log-out',userControllers.logoutUser);
+
+router.put('/update-user/:id', authUserMiddleware,userControllers.updateUser);
 
 router.delete('/delete-user/:id',authMiddleware, userControllers.deleteUser);
 

@@ -3,13 +3,14 @@ const ProductDtb=require('../models/Product.Model');
 
 module.exports.createProduct= async (newProduct) =>{
     try {
+        console.log('ok');
         const {name,image,type,countInStock,description}= newProduct;
         const checkProduct= await ProductDtb.findOne({
             name: name
         })
         if(checkProduct!==null) {
             return {
-                status: "OK",
+                status: "ERR",
                 message: "San pham da ton tai"
             }
         }
@@ -17,7 +18,7 @@ module.exports.createProduct= async (newProduct) =>{
         const createProduct= await ProductDtb.create(newProduct);
         if(createProduct) {
             return {
-                status: 'ok',
+                status: 'OK',
                 message: 'Thanh cong',
                 createProduct
             }
@@ -38,14 +39,14 @@ module.exports.updateProduct= async (id,dataUpdate) =>{
 
         if(checkProduct===null) {
             return {
-                status: "OK",
+                status: "ERR",
                 message: "San pham khong ton tai"
             }
         }
         const updateProduct= await ProductDtb.findByIdAndUpdate(id,dataUpdate,{new:true});
         if(updateProduct) {
             return {
-                status: 'ok',
+                status: 'OK',
                 message: 'Thanh cong',
                 updateProduct
             }
@@ -66,7 +67,7 @@ module.exports.deitailProduct= async (id) =>{
         console.log(checkProduct)
         if(!checkProduct) {
             return {
-            status : "OK",
+            status : "ERR",
             message: "San pham khong ton tai"
             }
         }
@@ -91,7 +92,7 @@ module.exports.deleteProduct= async (id) =>{
 
         if (!checkProduct) {
             return {
-                status : "OK",
+                status : "ERR",
                 message: "San pham khong ton tai"
             }
         }
@@ -107,13 +108,22 @@ module.exports.deleteProduct= async (id) =>{
     }
 }
 
-module.exports.getAllProduct= async (page = 1) =>{
+module.exports.getAllProduct= async (page = 1,key,value) =>{
     try {
         const limit=6;
         const totalProduct= await ProductDtb.countDocuments();
         const totalPage=Math.ceil(totalProduct/limit);
         const skipPage=(page-1) *limit;
-        const allProduct=await ProductDtb.find().limit(limit).skip(skipPage);
+
+        const sort={};
+        if(key&&value) {
+            sort[`${key}`]=value;
+        }
+        else {
+            sort.name='asc';
+        }
+
+        const allProduct=await ProductDtb.find().limit(limit).skip(skipPage).sort(sort);
         if(allProduct.length>0) {
             return {
             status: 'OK',

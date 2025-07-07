@@ -12,7 +12,7 @@ module.exports.createUser = async (newUser) => {
         
         if(checkUser!==null) {
             return {
-                staus: 'ok',
+                status: 'ERR',
                 message: 'Email đã tồn tại'
             }
         }
@@ -22,7 +22,7 @@ module.exports.createUser = async (newUser) => {
 
         const createdUser = await UserDtb.create(newUser);
         return {
-            status: 'ok',
+            status: 'OK',
             message: 'Thành công ',
             data: createdUser
         };
@@ -40,18 +40,19 @@ module.exports.loginUser = async (dataUser) => {
         const checkUser= await UserDtb.findOne({
             email:dataUser.email
         })
-        
-        const passwordInut= await bcrypt.compare(dataUser.password,checkUser.password);
 
         if(checkUser==null) {
             return {
-                staus: 'ok',
+                status: 'ERR',
                 message: 'Email khong tồn tại'
             }
         }
-        else if (!passwordInut) {
+
+        const passwordInut= await bcrypt.compare(dataUser.password,checkUser.password);
+
+        if (!passwordInut) {
              return {
-                staus: 'ok',
+                status: 'ERR',
                 message: 'Mật khẩu không chính xác'
             }
         }
@@ -60,13 +61,13 @@ module.exports.loginUser = async (dataUser) => {
             id:checkUser.id,
             IsAdmin: checkUser.IsAdmin
         })
-
+  
         const refresh_token=JwtService.genneralRefreshToken({
             id:checkUser.id,
             IsAdmin: checkUser.IsAdmin
         })
         return {
-            status: 'ok',
+            status: 'OK',
             message: 'Thành công ',
             access_token,
             refresh_token
@@ -86,23 +87,23 @@ module.exports.updateUser= async (userId,dataChange) =>{
         
         if(dataChange.password) {
              dataChange.password= await bcrypt.hash(dataChange.password, 10);
-             console.log(dataChange.password);
+    
         }
         
 
         if(checkUser==null) {
             return {
-                staus: 'ok',
+                status: 'ERR',
                 message: 'khong tồn tại tài khoản này'
             }
         }
 
-        const updateUser= await UserDtb.findByIdAndUpdate(userId,dataChange,{new:true})
+        const updateUser= await UserDtb.findByIdAndUpdate(userId,dataChange,{new:true}).select('-password')
        
         return {
-            status: 'ok',
+            status: 'OK',
             message: 'Thành công ',
-            data: updateUser
+            user: updateUser
         };
       
     } catch (error) {
@@ -118,7 +119,7 @@ module.exports.deleteUser= async (userId) => {
         })
         if (!checkUser) {
             return {
-                status : "OK",
+                status : "ERR",
                 message: "User khong ton tai"
             }
         }
@@ -154,7 +155,7 @@ module.exports.getDetailUser= async (userId) =>{
     try {
         const checkUser=await UserDtb.findOne({
             _id: userId
-        });
+        }).select('-password');
         if(!checkUser) {
             return {
             status : "OK",

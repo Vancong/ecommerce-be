@@ -1,4 +1,5 @@
 const jwt=require('jsonwebtoken');
+
 const dotenv=require('dotenv').config();
 
 const authMiddleware= (req,res,next) =>{
@@ -10,9 +11,8 @@ const authMiddleware= (req,res,next) =>{
                 status: 'ERROR'
             })
         }
-        const {payload} =user;
 
-        if(payload.IsAdmin) {
+        if(user.IsAdmin) {
             next();
         }
         else {
@@ -33,9 +33,7 @@ const authUserMiddleware= (req,res,next) =>{
                 status: 'ERROR'
             })
         }
-        const {payload} =user;
-
-        if(payload?.IsAdmin||payload?.id===userId) {
+        if(user?.IsAdmin||user?.id===userId) {
             next();
         }
         else {

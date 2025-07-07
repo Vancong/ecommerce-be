@@ -3,7 +3,7 @@ const ProductService=require('../services/productService')
 // [POST] /api/product/create
 module.exports.createProduct= async (req,res) =>{
     try {
-        console.log(req.body);
+        
         const {name,image,type,countInStock,description}= req.body;
         if(!name || !image || !type || !countInStock ||!description ) {
             return res.status(400).json({
@@ -86,7 +86,8 @@ module.exports.deleteProduct= async (req,res) =>{
 module.exports.getAllProduct= async(req,res) =>{
     try {
         const page=parseInt(req.query.page);
-        const response=await ProductService.getAllProduct(page);
+        const {key,value}=req.query;
+        const response=await ProductService.getAllProduct(page,key,value);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(404).json({

@@ -6,7 +6,7 @@ dotenv.config();
 module.exports.genneralAccessToken= (payload) =>{
    
     const accessToken=jwt.sign({
-        payload
+        ...payload
     }
     , process.env.ACCESS_TOKEN,{expiresIn:'30s'})
     return accessToken
@@ -15,7 +15,7 @@ module.exports.genneralAccessToken= (payload) =>{
 module.exports.genneralRefreshToken= (payload) =>{
 
     const refreshToken=jwt.sign({
-        payload
+        ...payload
     }
     ,process.env.REFRESH_TOKEN,{expiresIn:'365d'})
 
