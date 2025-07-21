@@ -1,17 +1,16 @@
 
 const ProductDtb=require('../models/Product.Model');
-
+const paginationHelper=require ("../helper/pagination.js");
 module.exports.createProduct= async (newProduct) =>{
     try {
-        console.log('ok');
-        const {name,image,type,countInStock,description}= newProduct;
+        const {name}= newProduct;
         const checkProduct= await ProductDtb.findOne({
             name: name
         })
-        if(checkProduct!==null) {
+        if(checkProduct) {
             return {
                 status: "ERR",
-                message: "San pham da ton tai"
+                message: "Sản phẩm đã tồn tại"
             }
         }
 
@@ -19,14 +18,15 @@ module.exports.createProduct= async (newProduct) =>{
         if(createProduct) {
             return {
                 status: 'OK',
-                message: 'Thanh cong',
+                message: 'Tạo sản phẩm thành công',
                 createProduct
             }
         }
 
     } catch (error) {
          return {
-            message: error
+              status: "ERR",
+             message: error.message || "Lỗi không xác định"
         }
     }
 }
@@ -64,7 +64,6 @@ module.exports.deitailProduct= async (id) =>{
         const checkProduct=await ProductDtb.findOne({
             _id: id
         });
-        console.log(checkProduct)
         if(!checkProduct) {
             return {
             status : "ERR",
@@ -108,35 +107,40 @@ module.exports.deleteProduct= async (id) =>{
     }
 }
 
-module.exports.getAllProduct= async (page = 1,key,value) =>{
+module.exports.deleteManyProduct=async (ids) =>{
     try {
-        const limit=6;
-        const totalProduct= await ProductDtb.countDocuments();
-        const totalPage=Math.ceil(totalProduct/limit);
-        const skipPage=(page-1) *limit;
-
-        const sort={};
-        if(key&&value) {
-            sort[`${key}`]=value;
-        }
-        else {
-            sort.name='asc';
-        }
-
-        const allProduct=await ProductDtb.find().limit(limit).skip(skipPage).sort(sort);
-        if(allProduct.length>0) {
-            return {
-            status: 'OK',
-            message: 'Thanh cong',
-            data: allProduct,
-            totalPage: totalPage
-            }
-        }
-        
+        await ProductDtb.deleteMany({ _id: { $in: ids } });
         return {
-            message: "err"
+            status: 'OK',
+            message: "Xoa san pham thanh cong"
         }
-       
+    } catch (error) {
+        return {
+            message: error
+        }
+    }
+}
+
+module.exports.getAllProduct= async (limit,page = 1,key,value,search='') =>{
+    try {
+        const sort = {};
+        if (key && value){
+            sort[key] = value;
+        }
+        else sort.name = 'asc';
+
+        let query = {};
+        if (search && search.trim() !== '') {
+            query.name = { $regex: search.trim(), $options: 'i' };  
+        }
+
+        return await paginationHelper({
+            model: ProductDtb,
+            page,
+            limit,
+            sort,
+            query
+        });
        
     }catch (error) {
           return {

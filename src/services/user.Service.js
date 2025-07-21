@@ -2,13 +2,14 @@
 const UserDtb = require('../models/User.Model');
 const bcrypt=require('bcrypt');
 const JwtService=require('./JwtService');
-
+const paginationHelper=require("../helper/pagination")
 module.exports.createUser = async (newUser) => {
 
     try {
         const checkUser= await UserDtb.findOne({
             email:newUser.email
         })
+        newUser.name=newUser.email;
         
         if(checkUser!==null) {
             return {
@@ -59,12 +60,12 @@ module.exports.loginUser = async (dataUser) => {
       
         const access_token=JwtService.genneralAccessToken({
             id:checkUser.id,
-            IsAdmin: checkUser.IsAdmin
+            isAdmin: checkUser.isAdmin
         })
   
         const refresh_token=JwtService.genneralRefreshToken({
             id:checkUser.id,
-            IsAdmin: checkUser.IsAdmin
+            isAdmin: checkUser.isAdmin
         })
         return {
             status: 'OK',
@@ -135,14 +136,44 @@ module.exports.deleteUser= async (userId) => {
     }
 }
 
-module.exports.getAllUser= async () =>{
-    try {
-        const allUser=await UserDtb.find();
+module.exports.deleteManyUser=async(ids) =>{
+     try {
+        console.log(ids);
+        await UserDtb.deleteMany({ _id: { $in: ids } });
         return {
             status: 'OK',
-            message: 'Thanh cong',
-            data: allUser
+            message: "Xoa user thanh cong"
         }
+    } catch (error) {
+        return {
+            message: error
+        }
+    }
+}
+
+module.exports.getAllUser= async (limit,page = 1,key,value,search='') =>{
+    try {
+        const sort = {};
+        if (key && value){
+            sort[key] = value;
+        }
+        else sort.name = 'asc';
+
+        let query = {};
+        if (search && search.trim() !== '') {
+              query.$or = [
+                    { name: { $regex: search.trim(), $options: 'i' } },
+                    { email: { $regex: search.trim(), $options: 'i' } }
+              ];
+        }
+        return await paginationHelper({
+            model: UserDtb,
+            page,
+            limit,
+            sort,
+            query
+        });
+    
     } catch (error) {
           return {
             message: error

@@ -10,31 +10,6 @@ module.exports.index= (req,res) => {
 module.exports.createUser= async (req,res) =>{
     
    try {
-        const {email,password,confirmPassword}=req.body;
-        const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
-        
-        const isCheckMail=reg.test(email);
-     
-        if(  !email || !password || !confirmPassword ) {
-            return res.status(400).json({
-                status: "ERR",
-                message: "Vui lòng nhập đầy đủ email và mật khẩu."
-            })
-        }
-        else if(!isCheckMail) {
-                return res.status(400).json({
-                status: "ERR",
-                message: "Email không hợp lệ"
-            })
-        }
-        
-        else if(password!==confirmPassword) {
-            return res.status(400).json({
-                status: "ERR",
-                message: "Mật khẩu không khớp"
-            })
-        }
-
 
         const user=await userService.createUser(req.body); 
         if (user.status === 'ERR') {
@@ -42,7 +17,7 @@ module.exports.createUser= async (req,res) =>{
         }
         return res.status(200).json(user);
    } catch (error) {
-        return res.status(404).json( {
+        return res.status(500).json( {
             message: error
         })
    }
@@ -51,25 +26,7 @@ module.exports.createUser= async (req,res) =>{
 // [POST] /api/user/sigin-in
 module.exports.loginUser= async (req,res) =>{
       try {
-        const {email,password}=req.body;
-        const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
         
-        const isCheckMail=reg.test(email);
-   
-        if(!email || !password  ) {
-            return res.status(400).json({
-                status: "ERR",
-                message: "Vui lòng nhập đầy đủ email và mật khẩu."
-            })
-        }
-        else if(!isCheckMail) {
-       
-             return res.status(400).json({
-                status: "ERR",
-                message: "Email không hợp lệ"
-            })
-        }
-       
         const user=await userService.loginUser(req.body); 
         const {refresh_token,...newUser}=user;
         res.cookie('refresh_token',refresh_token,{
@@ -84,7 +41,7 @@ module.exports.loginUser= async (req,res) =>{
         }
         return res.status(200).json(newUser);
    } catch (error) {
-        return res.status(404).json( {
+        return res.status(500).json( {
             message: error
         })
    }
@@ -99,7 +56,7 @@ module.exports.logoutUser= async (req,res) =>{
             message: 'Đăng xuất thành công'
         })
     } catch (error) {
-        return res.status(400).json({
+        return res.status(500).json({
             message: error
         })
     }
@@ -107,29 +64,16 @@ module.exports.logoutUser= async (req,res) =>{
 
 // [PUT] /api/user/update-user/:id
 module.exports.updateUser= async (req,res) =>{
-
     try {
         const userId=req.params.id;
         const data=req.body;
+        if(req.file){
+            data.avt=req.file.path;
+        }
         if(!userId) {
             return res.status(400).json({
                 status: 'err',
                 message:'Bắt buộc có userId'
-            })
-        }
-        if(!data.email) {
-             return res.status(400).json({
-                status: "ERR",
-                message: "Không được bỏ trống Email"
-            })
-        }
-
-        const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
-        const isCheckMail=reg.test(data.email);
-        if(!isCheckMail) {
-            return res.status(400).json({
-                status: "ERR",
-                message: "Email không hợp lệ"
             })
         }
 
@@ -137,7 +81,9 @@ module.exports.updateUser= async (req,res) =>{
         return res.status(200).json(dataChange)
 
     } catch (error) {
-        console.log('er')
+        return res.status(500).json({
+            message: error
+        })
     }
 }
 
@@ -157,19 +103,41 @@ module.exports.deleteUser= async (req,res) =>{
         return res.status(200).json(response);
         
     } catch (error) {
-        return res.status(404).json({
+        return res.status(500).json({
             message: error
         })
     }
 }
 
+// [DELETE] /api/user/delete-many
+module.exports.deleteManyUser= async (req,res) =>{
+    try {
+        const ids=req.body;
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                 status: "ERR", 
+                 message: "Dach sach id khong hop le" 
+            });
+        }
+        const response= await userService.deleteManyUser(ids);
+        return res.status(200).json(response);
+        
+    } catch (error) {
+        return res.status(500).json({
+            message: error
+        })
+    }
+}
 // [GET] /api/user/getAll
 module.exports.getAllUser= async (req,res) =>{
     try {
-        const response=await userService.getAllUser();
+        const page=parseInt(req.query.page);
+        const limit=parseInt(req.query.limit)
+        const {key,value,search}=req.query;
+        const response=await userService.getAllUser(limit,page,key,value,search);
         return res.status(200).json(response);
     } catch (error) {
-        return res.status(404).json({
+        return res.status(500).json({
             message :error
         })
     }
@@ -182,7 +150,7 @@ module.exports.getDetailUser= async (req,res) =>{
         const response=await userService.getDetailUser(userId);
         return res.status(200).json(response);
     } catch (error) {
-        return res.status(404).json({
+        return res.status(500).json({
             message :error
         })
     }
@@ -203,7 +171,7 @@ module.exports.refreshToken= async (req,res) =>{
         
         return res.status(200).json(response);
     } catch (error) {
-        return res.status(404).json({
+        return res.status(500).json({
             message :error
         })
     }

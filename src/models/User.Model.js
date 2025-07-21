@@ -1,13 +1,14 @@
 const mongoose=require('mongoose');
 const userSchema= new mongoose.Schema(
     {
-        name: {type:String},
-        email: {type:String,require:true, unique:true},
-        password: {type:String,require:true},
-        IsAdmin:{type:Boolean,require:true,default:false},
-        phone:{type:Number},
-        address: {type: String},
-        avt: {type:String}
+        name: {type:String,trim: true },
+        email: {type:String,required:true, unique:true,trim: true },
+        password: {type:String,required:true,trim: true },
+        isAdmin:{type:Boolean,required:true,default:false},
+        phone:{type:Number,trim: true},
+        address: {type: String,trim: true },
+        avt: {type:String},
+        isActive: {type: Boolean,default:true}
     },
     {
         timestamp:true

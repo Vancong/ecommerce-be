@@ -2,16 +2,21 @@ const express=require('express');
 const router=express.Router();
 const userControllers=require("../controllers/user.controller");
 const {authMiddleware,authUserMiddleware}=require("../middleware/auth.middleware");
+const uploadImg = require("../middleware/uploadImg").upload("users");
+const {validateSignup,validateLogin,validateUpdateUser}=require("../middleware/validate.middleware");
 
-router.post('/sign-up',userControllers.createUser);
+router.post('/sign-up',validateSignup,userControllers.createUser);
 
-router.post('/sign-in',userControllers.loginUser);
+router.post('/sign-in',validateLogin,userControllers.loginUser);
 
 router.post('/log-out',userControllers.logoutUser);
 
-router.put('/update-user/:id', authUserMiddleware,userControllers.updateUser);
+router.put('/update-user/:id',uploadImg.single('avt'),
+ authUserMiddleware,validateUpdateUser, userControllers.updateUser);
 
 router.delete('/delete-user/:id',authMiddleware, userControllers.deleteUser);
+
+router.post('/delete-many',authMiddleware,userControllers.deleteManyUser);
 
 router.get('/getAll',authMiddleware, userControllers.getAllUser);
 

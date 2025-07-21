@@ -3,8 +3,9 @@ const jwt=require('jsonwebtoken');
 const dotenv=require('dotenv').config();
 
 const authMiddleware= (req,res,next) =>{
-
+    
     const token = req.headers.token.split(' ')[1];
+    console.log(token)
     jwt.verify(token,process.env.ACCESS_TOKEN, function(err,user) {
          if(err) {
             return res.status(404).json({
@@ -12,7 +13,7 @@ const authMiddleware= (req,res,next) =>{
             })
         }
 
-        if(user.IsAdmin) {
+        if(user.isAdmin) {
             next();
         }
         else {
@@ -33,7 +34,8 @@ const authUserMiddleware= (req,res,next) =>{
                 status: 'ERROR'
             })
         }
-        if(user?.IsAdmin||user?.id===userId) {
+        if(user?.isAdmin||user?.id===userId) {
+            req.user = user;
             next();
         }
         else {
