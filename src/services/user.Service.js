@@ -2,206 +2,147 @@
 const UserDtb = require('../models/User.Model');
 const bcrypt=require('bcrypt');
 const JwtService=require('./JwtService');
-const paginationHelper=require("../helper/pagination")
+const paginationHelper=require("../helper/pagination");
+const createError=require('../helper/createError')
 module.exports.createUser = async (newUser) => {
-
-    try {
-        const checkUser= await UserDtb.findOne({
-            email:newUser.email
-        })
-        newUser.name=newUser.email;
-        
-        if(checkUser!==null) {
-            return {
-                status: 'ERR',
-                message: 'Email đã tồn tại'
-            }
-        }
-      
-        const hash= await bcrypt.hash(newUser.password, 10);
-        newUser.password=hash;
-
-        const createdUser = await UserDtb.create(newUser);
-        return {
-            status: 'OK',
-            message: 'Thành công ',
-            data: createdUser
-        };
-      
-    } catch (error) {
-        console.error('Error');
-        throw error;
+    const checkUser= await UserDtb.findOne({
+        email:newUser.email
+    })
+    newUser.name=newUser.email;
+    
+    if(checkUser!==null) {
+        throw createError(409,'Email đã tồn tại');
     }
+    
+    const hash= await bcrypt.hash(newUser.password, 10);
+    newUser.password=hash;
+
+    const createdUser = await UserDtb.create(newUser);
+    return {
+        status: 'OK',
+        message: 'Thành công ',
+        data: createdUser
+    };    
+
 };
 
 
 module.exports.loginUser = async (dataUser) => {
 
-    try {
-        const checkUser= await UserDtb.findOne({
-            email:dataUser.email
-        })
+    const user= await UserDtb.findOne({email: dataUser.email})
+    const passwordInut= await bcrypt.compare(dataUser.password,user.password);
 
-        if(checkUser==null) {
-            return {
-                status: 'ERR',
-                message: 'Email khong tồn tại'
-            }
-        }
-
-        const passwordInut= await bcrypt.compare(dataUser.password,checkUser.password);
-
-        if (!passwordInut) {
-             return {
-                status: 'ERR',
-                message: 'Mật khẩu không chính xác'
-            }
-        }
-      
-        const access_token=JwtService.genneralAccessToken({
-            id:checkUser.id,
-            isAdmin: checkUser.isAdmin
-        })
-  
-        const refresh_token=JwtService.genneralRefreshToken({
-            id:checkUser.id,
-            isAdmin: checkUser.isAdmin
-        })
-        return {
-            status: 'OK',
-            message: 'Thành công ',
-            access_token,
-            refresh_token
-        };
-      
-    } catch (error) {
-        console.error('Error');
-        throw error;
+    if (!passwordInut) {
+        throw createError(400,'Mật khẩu không chính xác');
     }
+    const access_token=JwtService.genneralAccessToken({
+        id:user.id,
+        isAdmin: user.isAdmin,
+        email:user.email
+    })
+
+    const refresh_token=JwtService.genneralRefreshToken({
+        id:user.id,
+        isAdmin: user.isAdmin,
+        email: user.email
+    })
+    return {
+        status: 'OK',
+        message: 'Thành công ',
+        access_token,
+        refresh_token
+    };
+    
 };
 
 module.exports.updateUser= async (userId,dataChange) =>{
-      try {
-        const checkUser= await UserDtb.findOne({
-            _id: userId
-        })
-        
-        if(dataChange.password) {
-             dataChange.password= await bcrypt.hash(dataChange.password, 10);
+    const checkUser= await UserDtb.findOne({
+        _id: userId
+    })
     
-        }
-        
-
-        if(checkUser==null) {
-            return {
-                status: 'ERR',
-                message: 'khong tồn tại tài khoản này'
-            }
-        }
-
-        const updateUser= await UserDtb.findByIdAndUpdate(userId,dataChange,{new:true}).select('-password')
-       
-        return {
-            status: 'OK',
-            message: 'Thành công ',
-            user: updateUser
-        };
-      
-    } catch (error) {
-        console.error('Error');
-        throw error;
+     if(!checkUser) {
+        throw createError(404,'khong tồn tại tài khoản này');
     }
+    if(dataChange.password) {
+            dataChange.password= await bcrypt.hash(dataChange.password, 10);
+
+    }
+    
+    const updateUser= await UserDtb.findByIdAndUpdate(userId,dataChange,{new:true}).select('-password')
+    
+    return {
+        status: 'OK',
+        message: 'Thành công ',
+        user: updateUser,
+        access_token,
+        refresh_token
+    };
+      
+   
 }
 
 module.exports.deleteUser= async (userId) => {
-    try {
-        const checkUser= await UserDtb.findOne({
-            _id: userId
-        })
-        if (!checkUser) {
-            return {
-                status : "ERR",
-                message: "User khong ton tai"
-            }
-        }
-        await UserDtb.findByIdAndDelete(userId);
-        return {
-            status: 'OK',
-            message: "Xoa user thanh cong"
-        }
-    } catch (error) {
-        return {
-            message: error
-        }
+    const checkUser= await UserDtb.findOne({
+        _id: userId
+    })
+    if (!checkUser) {
+        throw createError(404,'khong tồn tại tài khoản này');
     }
+    await UserDtb.findByIdAndDelete(userId);
+    return {
+        status: 'OK',
+        message: "Xoa user thanh cong"
+    }
+   
 }
 
 module.exports.deleteManyUser=async(ids) =>{
-     try {
-        console.log(ids);
-        await UserDtb.deleteMany({ _id: { $in: ids } });
-        return {
-            status: 'OK',
-            message: "Xoa user thanh cong"
-        }
-    } catch (error) {
-        return {
-            message: error
-        }
+    await UserDtb.deleteMany({ _id: { $in: ids } });
+    return {
+        status: 'OK',
+        message: "Xoa user thanh cong"
     }
 }
 
 module.exports.getAllUser= async (limit,page = 1,key,value,search='') =>{
-    try {
-        const sort = {};
-        if (key && value){
-            sort[key] = value;
-        }
-        else sort.name = 'asc';
 
-        let query = {};
-        if (search && search.trim() !== '') {
-              query.$or = [
-                    { name: { $regex: search.trim(), $options: 'i' } },
-                    { email: { $regex: search.trim(), $options: 'i' } }
-              ];
-        }
-        return await paginationHelper({
-            model: UserDtb,
-            page,
-            limit,
-            sort,
-            query
-        });
-    
-    } catch (error) {
-          return {
-            message: error
-        }
+    const sort = {};
+    if (key && value){
+        sort[key] = value;
     }
+    else sort.name = 'asc';
+
+    let query = {};
+    if (search && search.trim() !== '') {
+            query.$or = [
+                { name: { $regex: search.trim(), $options: 'i' } },
+                { email: { $regex: search.trim(), $options: 'i' } }
+            ];
+    }
+    return await paginationHelper({
+        model: UserDtb,
+        page,
+        limit,
+        sort,
+        query
+    });
+    
+   
 }
 
 
 module.exports.getDetailUser= async (userId) =>{
-    try {
-        const checkUser=await UserDtb.findOne({
-            _id: userId
-        }).select('-password');
-        if(!checkUser) {
-            return {
-            status : "OK",
-            message: "User khong ton tai"
-            }
-        }
-        return {
-            status: 'OK',
-            message: 'Thanh cong',
-            data: checkUser
-        }
-    } catch (error) {
-          return {
-            message: error
-        }
+    const checkUser=await UserDtb.findOne({
+        _id: userId
+    }).select('-password');
+    if(!checkUser) {
+        throw createError(404,'khong tồn tại tài khoản này');
     }
+    return {
+        status: 'OK',
+        message: 'Thanh cong',
+        data: checkUser
+    }
+
 }
 

@@ -8,7 +8,8 @@ module.exports.genneralAccessToken= (payload) =>{
     const accessToken=jwt.sign({
         ...payload
     }
-    , process.env.ACCESS_TOKEN,{expiresIn:'30s'})
+    , process.env.ACCESS_TOKEN,{expiresIn:'1h'})
+    console.log('Access token login:', accessToken);
     return accessToken
 }
 
@@ -24,10 +25,10 @@ module.exports.genneralRefreshToken= (payload) =>{
 
 
 
-module.exports.refreshTokenJwtServices = async (token) => {
+module.exports.refreshTokenJwtServices =  (token) => {
     try {
         return new Promise((resolve, reject) => {
-            jwt.verify(token, process.env.REFRESH_TOKEN, async (err, user) => {
+            jwt.verify(token, process.env.REFRESH_TOKEN, (err, user) => {
                 if (err) {
                     return resolve({
                         status: 'ERR',
@@ -35,11 +36,12 @@ module.exports.refreshTokenJwtServices = async (token) => {
                     });
                 }
 
-                const { id, isAdmin } = user;
+                const { id, isAdmin,email } = user;
 
                 const newAccessToken = module.exports.genneralAccessToken({
                     id,
-                    isAdmin
+                    isAdmin,
+                    email
                 });
 
                 return  resolve({

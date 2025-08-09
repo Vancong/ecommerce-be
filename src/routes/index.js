@@ -1,8 +1,22 @@
 
 const userRouter=require('./user.router');
 const productRouter=require('./product.router');
+const brandRouter=require('./brand.router');
+const noteRouter=require ('./note.router');
+const noteGroupRouter=require('./noteGroup.router');
+const cartRouter=require('./cart.router')
+const orderRouter=require('./order.router')
+const favoriteRouter=require('./favorite.router');
+const errorHandler =require('../middleware/errorHandler.middeware')
 module.exports.index= (app) =>{
     app.use('/api/user',userRouter);
     app.use('/api/product',productRouter);
+    app.use('/api/brand',brandRouter)
+    app.use('/api/note',noteRouter);
+    app.use('/api/note-group',noteGroupRouter);
+    app.use('/api/cart',cartRouter);
+    app.use('/api/order',orderRouter);
+    app.use('/api/favorite',favoriteRouter);
+    app.use(errorHandler);
 }
 
