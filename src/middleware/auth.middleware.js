@@ -9,7 +9,6 @@ const authMiddleware= (req,res,next) =>{
     const authHeader = req.headers.token;
     let token = authHeader && authHeader.split(' ')[1];   
     token = token.replace(/^"(.*)"$/, '$1').trim();
-    console.log(token)
     jwt.verify(token,process.env.ACCESS_TOKEN, function(err,user) {
          if(err) {
                console.error( err.message);
@@ -19,6 +18,7 @@ const authMiddleware= (req,res,next) =>{
         }
 
         if(user.isAdmin) {
+            req.user=user;
             next();
         }
         else {
@@ -36,7 +36,6 @@ const authUserMiddleware= (req,res,next) =>{
     const userId=req.params.userId;
     let token = req.headers.token.split(' ')[1];
     token = token.replace(/^"(.*)"$/, '$1').trim();
-
     jwt.verify(token,process.env.ACCESS_TOKEN, function(err,user) {
          if(err) {
             console.log(err.message)

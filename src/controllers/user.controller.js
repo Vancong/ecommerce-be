@@ -44,7 +44,6 @@ module.exports.logoutUser=asyncHandler( async (req,res) =>{
 module.exports.updateUser=asyncHandler( async (req,res) =>{
 
     const userId=req.params.userId;
-    console.log(userId)
     const data=req.body;
     if(req.file){
         data.avt=req.file.path;

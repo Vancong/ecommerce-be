@@ -54,14 +54,14 @@ module.exports.deleteManyProduct= asyncHandler(async(req,res) =>{
 module.exports.getAllProduct= asyncHandler(async(req,res) =>{
     const page=parseInt(req.query.page||1);
     const limit=parseInt(req.query.limit)||10
-    const {key,value,search,...restFilters}=req.query;
+    const {key,value,search,isAdmin,...restFilters}=req.query;
     const filters={
         search,
         ...restFilters
     }
 
 
-    const response=await ProductService.getAllProduct(limit,page,key,value,filters);
+    const response=await ProductService.getAllProduct(limit,page,key,value,filters,isAdmin);
     return res.status(200).json(response);
     
 })

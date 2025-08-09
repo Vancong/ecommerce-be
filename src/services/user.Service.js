@@ -32,6 +32,13 @@ module.exports.loginUser = async (dataUser) => {
     const user= await UserDtb.findOne({email: dataUser.email})
     const passwordInut= await bcrypt.compare(dataUser.password,user.password);
 
+    if (!user) {
+        throw createError(404, 'Người dùng không tồn tại');
+    }
+    if (!user.isActive) {
+      throw createError(403, 'Tài khoản đã bị khoá hoặc chưa được kích hoạt!');
+    }
+
     if (!passwordInut) {
         throw createError(400,'Mật khẩu không chính xác');
     }
@@ -74,8 +81,7 @@ module.exports.updateUser= async (userId,dataChange) =>{
         status: 'OK',
         message: 'Thành công ',
         user: updateUser,
-        access_token,
-        refresh_token
+
     };
       
    

@@ -27,7 +27,9 @@ module.exports.getDetail= async (id) =>{
 }
 
 
-module.exports.getAllBrand= async (limit,page = 1,key,value,search='') =>{
+module.exports.getAllBrand= async (limit,page = 1,key,value,search='',isAdmin) =>{
+
+
     const sort = {};
     if (key && value){
         sort[key] = value;
@@ -35,6 +37,11 @@ module.exports.getAllBrand= async (limit,page = 1,key,value,search='') =>{
     else sort.name = 'asc';
 
     let query = {}; 
+    
+    const checkIsAdmin=isAdmin==='true';
+    if(!checkIsAdmin) {
+        query.isActive=true;
+    }
     if (search && search.trim() !== '') {
         query.name = { $regex: search.trim(), $options: 'i' };
 

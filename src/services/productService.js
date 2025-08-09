@@ -102,7 +102,7 @@ module.exports.deleteManyProduct=async (ids) =>{
    
 }
 
-module.exports.getAllProduct= async (limit,page = 1,key,value,filters={}) =>{
+module.exports.getAllProduct= async (limit,page = 1,key,value,filters={},isAdmin) =>{
 
     const sort = {};
     if (key && value){
@@ -111,6 +111,21 @@ module.exports.getAllProduct= async (limit,page = 1,key,value,filters={}) =>{
     else sort.name = 'asc';
 
     let query = {};
+    
+    const checkIsAdmin=isAdmin==='true';
+    if(!checkIsAdmin) {
+        query.isActive=true;
+    }
+
+    let populate={ path: 'brand', select: 'name isActive' }
+
+    if (filters.brands) {
+        const brandsArr = filters.brands.split(',');
+        query.brand = { $in: brandsArr };
+    }
+
+
+
     if (filters.search && filters.search.trim() !== '') {
         query.$or = [
             { name: { $regex: filters.search, $options: 'i' } },
@@ -132,13 +147,6 @@ module.exports.getAllProduct= async (limit,page = 1,key,value,filters={}) =>{
     
 
 
-    if (filters.brands) {
-        const brandsArr = filters.brands.split(',');
-        query.brand = { $in: brandsArr };
-    }
-
-
-    let populate={ path: 'brand', select: 'name' }
     if(filters.notes) {
         populate=[
             populate,
@@ -146,7 +154,8 @@ module.exports.getAllProduct= async (limit,page = 1,key,value,filters={}) =>{
             { path: 'notes.middle', populate: { path: 'group' } },
             { path: 'notes.base', populate: { path: 'group' } },
         ]
-    }
+    }   
+
 
     const res= await paginationHelper({
         model: ProductDtb,
@@ -193,7 +202,10 @@ module.exports.getAllProduct= async (limit,page = 1,key,value,filters={}) =>{
         res.data=dataProduct;
         return res;
     }
-  
+
+    if(!checkIsAdmin) {
+        res.data=res.data.filter(product => product.brand&&product.brand.isActive)
+    }
     return res;
        
 }

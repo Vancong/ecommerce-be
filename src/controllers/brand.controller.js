@@ -40,8 +40,8 @@ module.exports.getAll=asyncHandler( async (req,res) =>{
    
         const page=parseInt(req.query.page);
         const limit=parseInt(req.query.limit)
-        const {key,value,search}=req.query;
-        const response=await BrandService.getAllBrand(limit,page,key,value,search);
+        const {key,value,search,isAdmin}=req.query;
+        const response=await BrandService.getAllBrand(limit,page,key,value,search,isAdmin);
         return res.status(200).json(response);
 })
 
@@ -50,7 +50,6 @@ module.exports.updateBrand=asyncHandler( async (req,res) =>{
  
     const brandId=req.params.id;
     const data=req.body;
-    console.log(req.body)
     
     const dataChange= await BrandService.update(brandId,data);
     return res.status(200).json(dataChange)
