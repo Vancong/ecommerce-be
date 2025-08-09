@@ -1,4 +1,3 @@
-const { string } = require('joi');
 const mongoose=require('mongoose');
 const slug = require('mongoose-slug-updater');
 mongoose.plugin(slug);
@@ -15,16 +14,26 @@ const ProductSchema= new mongoose.Schema(
             countInStock: { type: Number, default: 0 }
         }
         ],
+        notes: {
+            top: [
+                { type: mongoose.Schema.Types.ObjectId, ref: 'Notes' }
+            ],
+            middle: [
+                { type: mongoose.Schema.Types.ObjectId, ref: 'Notes' }
+            ],
+            base: [
+                { type: mongoose.Schema.Types.ObjectId, ref: 'Notes' }
+            ],
+        },
         selled:{type:Number,default: 0},
         brand: {
-            type: String
-            // type: mongoose.Schema.Types.ObjectId,
-            // ref: 'Brand',
-            // required: true,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Brands',
+            required: true,
         },
         gender: {
             type: String,
-            enum: ['Nam', 'Nữ', 'Unisex'],
+            enum: ['Male', 'Female', 'Unisex'],
             required: true,
         },
         concentration: {
