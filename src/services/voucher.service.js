@@ -2,6 +2,7 @@ const { date } = require('joi');
 const createError=require('../helper/createError');
 const VoucherDtb=require('../models/Voucher.Model');
 const paginationHelper=require('../helper/pagination');
+const OrderDtb=require('../models/Order.Model');
 
 module.exports.create= async(data) =>{
     const checkVoucher=await VoucherDtb.findOne({
@@ -31,7 +32,6 @@ module.exports.getAll= async(page,limit,search, isAdmin) =>{
     if (search && search.trim() !== '') {
             query.code = { $regex: search.trim(), $options: 'i' };
     }
-
    
     return await paginationHelper({
         model: VoucherDtb,
@@ -87,3 +87,40 @@ module.exports.deleteMany= async(ids) =>{
     }
 }
 
+module.exports.check= async(userId,code,totalPrice) =>{
+
+    const voucher= await VoucherDtb.findOne({
+        code:code,
+        isActive:true
+    })
+
+    if(!voucher||new Date(voucher.endDate)< new Date()||voucher.minOrderValue>totalPrice) {
+        throw createError(400,'Mã giảm giá không hợp lệ')
+   
+    }
+
+    if (voucher.startDate && new Date(voucher.startDate) > new Date()) {
+        throw createError(400, 'Mã giảm giá chưa đến thời gian sử dụng');
+    }
+
+    const usageCountByUser = await OrderDtb.countDocuments({
+        userId:userId,
+        discountCode: code,
+        status: { $in: ['confirmed', 'shipping', 'completed'] }
+    })
+
+    if(voucher.userLimit&& usageCountByUser>= voucher.userLimit) {
+         throw createError(400,'Bạn đã dùng quá số lần')
+    }
+
+      
+
+    return {
+        status: 'OK',
+        message: ' thành công',
+        data:{
+            iSuccess:true,
+            voucher: voucher
+        }
+    }
+}

@@ -9,6 +9,7 @@ const VoucherSchema= new mongoose.Schema(
             required: true
         },
         discountValue: {type: Number, required: true},
+        maxDiscountValue:{type: Number,default :null},
         minOrderValue: {type: Number,default:0},
         startDate: {type :Date,required:true},
         endDate: {type:Date,required:true},

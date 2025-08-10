@@ -2,9 +2,15 @@ const OrderDtb=require('../models/Order.Model');
 const generateOrderCode=require("../helper/generateOrderCode");
 const paginationHelper=require("../helper/pagination");
 const createErro=require("../helper/createError");
+const VoucherDtb=require('../models/Voucher.Model');
+const VoucherService=require('../services/voucher.service')
 module.exports.create= async(data) =>{
     const orderCode= await generateOrderCode();
     data.orderCode=orderCode;
+    if(data.discountCode) {
+        await VoucherService.check(data.user,data.discountCode,data.totalPrice);
+    }
+
     const newOrder= await OrderDtb.create(data);
         return {
         status: 'OK',

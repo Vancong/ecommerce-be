@@ -35,3 +35,14 @@ module.exports.deleteMany= asyncHandler(async(req,res)=>{
     const response = await VoucherService.deleteMany(ids);
     res.status(200).json(response);
 })
+
+// [POST] /api/voucher/check
+module.exports.check= asyncHandler(async(req,res)=>{
+    const userId=req.params.userId;
+    const {code,totalPrice}=req.body;
+    const response = await VoucherService.check(userId,code,totalPrice);
+    res.status(200).json(response);
+})
+
+
+

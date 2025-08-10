@@ -17,7 +17,8 @@ const validate= (schema) => (req, res, next)   =>{
 const VoucherSchema = Joi.object({
   code: Joi.string().required(), 
   discountType: Joi.string().required().valid("percentage","fixed"),
-  discountValue: Joi.number(),
+  discountValue: Joi.number().required(),
+  maxDiscountValue: Joi.number().allow(null, ''),
   minOrderValue: Joi.number(),
   startDate: Joi.alternatives().try(
     Joi.string().isoDate(),

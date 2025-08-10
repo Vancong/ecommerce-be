@@ -17,5 +17,6 @@ router.delete("/delete/:id",authMiddleware, voucherControllers.delete);
 
 router.post("/delete-many",authMiddleware,voucherControllers.deleteMany)
 
+router.post("/check/:userId",authUserMiddleware,voucherControllers.check)
 
 module.exports=router;

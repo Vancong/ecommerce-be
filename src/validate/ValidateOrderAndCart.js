@@ -13,13 +13,14 @@ const validate= (schema) => (req, res, next)   =>{
 }
 
 const checkFinalPrice=(req,res,next) =>{
-    console.log(req.body)
     let finalPrice=req.body.items.reduce((total,item)=>{
        return  total+item.quantity*item.price;
     },0)
     if(finalPrice<=1000000) {
         finalPrice+=28000;
     }
+    finalPrice-=req.body.discountValue
+
     if(req.body.finalPrice!==finalPrice) {
         return res.status(400).json({
         status: 'ERR'
@@ -36,7 +37,8 @@ const orderSchema = Joi.object({
   name: Joi.string().required(),
   phone: Joi.string().required(),
   email: Joi.string().email().optional().allow(null, ''),
-
+  discountCode: Joi.string().optional().allow(null, ''),
+  discountValue: Joi.number().optional().allow(null, ''),
   address: Joi.object({
     province: Joi.string().required(),
     district: Joi.string().required(),

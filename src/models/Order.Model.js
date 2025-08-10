@@ -37,8 +37,8 @@ const OrderSchema = new mongoose.Schema(
     ],
 
     totalPrice: { type: Number, required: true },    
-    // discountCode: { type: String },                     
-    // discountValue: { type: Number, default: 0 },        
+    discountCode: { type: String,default:null },                     
+    discountValue: { type: Number, default: 0 },        
     shipping: { type: Number, default: 0 },          
     finalPrice: { type: Number, required: true },       
 
