@@ -7,6 +7,7 @@ const noteGroupRouter=require('./noteGroup.router');
 const cartRouter=require('./cart.router')
 const orderRouter=require('./order.router')
 const favoriteRouter=require('./favorite.router');
+const voucherRouter=require('./voucher.router');
 const errorHandler =require('../middleware/errorHandler.middeware')
 module.exports.index= (app) =>{
     app.use('/api/user',userRouter);
@@ -17,6 +18,7 @@ module.exports.index= (app) =>{
     app.use('/api/cart',cartRouter);
     app.use('/api/order',orderRouter);
     app.use('/api/favorite',favoriteRouter);
+    app.use('/api/voucher',voucherRouter)
     app.use(errorHandler);
 }
 
