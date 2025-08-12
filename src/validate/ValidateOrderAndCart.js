@@ -59,7 +59,13 @@ const orderSchema = Joi.object({
   shipping: Joi.number().min(0).default(0),
   finalPrice: Joi.number().min(0).required(),
 
-  paymentMethod: Joi.string().valid('cod', 'bank_transfer', 'momo', 'zalopay').required(),
+  paymentMethod: Joi.string().valid('cod', 'momo', 'paypal').required(),
+
+  isPaid: Joi.boolean(),
+
+  paidAt:Joi.date(),
+
+  paypalOrderId: Joi.string(),
 
   status: Joi.string().valid('pending', 'confirmed', 'shipping', 'completed', 'cancelled').optional(),
 

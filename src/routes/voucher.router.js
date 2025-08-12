@@ -8,7 +8,7 @@ const {validateVoucher}=require("../validate/ValidateVoucher")
 
 router.post("/create",authMiddleware,validateVoucher,voucherControllers.create);
 
-router.get("/getAll",authUserMiddleware,voucherControllers.getAll);  
+router.get("/getAll/:userId",authUserMiddleware,voucherControllers.getAll);  
 
 router.patch("/update/:id",authMiddleware,validateVoucher, voucherControllers.update);  
 

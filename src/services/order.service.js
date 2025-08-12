@@ -10,6 +10,9 @@ module.exports.create= async(data) =>{
     if(data.discountCode) {
         await VoucherService.check(data.user,data.discountCode,data.totalPrice);
     }
+    if(data.paymentMethod==='vnpay'||data.paymentMethod==='paypal') {
+        data.status='confirmed'
+    }
 
     const newOrder= await OrderDtb.create(data);
         return {
@@ -57,6 +60,10 @@ module.exports.changeStatus=async (orderCode,status) =>{
     if (!order) {
         throw createErro(404, "Không tìm thấy đơn hàng");
     }
+    if(order.isPaid) {
+        status='refund_pending';
+    }
+
     if(order.status==='confirmed'||order.status==='pending'){
             await OrderDtb.updateOne({
                 orderCode

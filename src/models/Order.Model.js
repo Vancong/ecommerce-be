@@ -44,7 +44,7 @@ const OrderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ['cod', 'bank_transfer', 'momo', 'zalopay'],
+      enum: ['cod', 'momo', 'paypal'],
       required: true,
     },
 
@@ -54,13 +54,17 @@ const OrderSchema = new mongoose.Schema(
       default: false,
     },
 
+    paypalOrderId:{
+      type: String,
+      default: null
+    },
     paidAt: {
       type: Date,
     },
 
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'shipping', 'completed', 'cancelled'],
+      enum: ['pending', 'confirmed', 'shipping', 'completed', 'cancelled','refunded','refund_pending'],
       default: 'pending',
     },
 
