@@ -34,6 +34,7 @@ const authMiddleware= (req,res,next) =>{
 
 const authUserMiddleware= (req,res,next) =>{
     const userId=req.params.userId;
+    
     let token = req.headers.token.split(' ')[1];
     token = token.replace(/^"(.*)"$/, '$1').trim();
     jwt.verify(token,process.env.ACCESS_TOKEN, function(err,user) {
@@ -43,6 +44,7 @@ const authUserMiddleware= (req,res,next) =>{
                 status: 'ERROR'
             })
         }
+        console.log(userId)
         if(user?.isAdmin||user?.id===userId) {
             req.user = user;
             next();

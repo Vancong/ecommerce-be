@@ -2,8 +2,9 @@ const OrderDtb=require('../models/Order.Model');
 const generateOrderCode=require("../helper/generateOrderCode");
 const paginationHelper=require("../helper/pagination");
 const createErro=require("../helper/createError");
-const VoucherDtb=require('../models/Voucher.Model');
 const VoucherService=require('../services/voucher.service')
+const sendEmailHelpers=require('../helper/sendEmail.helpers')
+const htmlSendMailOrder=require('../helper/HtmlSendMailOrder');
 module.exports.create= async(data) =>{
     const orderCode= await generateOrderCode();
     data.orderCode=orderCode;
@@ -14,11 +15,27 @@ module.exports.create= async(data) =>{
         data.status='confirmed'
     }
 
-    const newOrder= await OrderDtb.create(data);
-        return {
-        status: 'OK',
-        message: 'Thành công ',
-        data: newOrder
+    let newOrder= await OrderDtb.create(data);
+    newOrder= await newOrder.populate('items.product', 'name images');
+
+    if(newOrder.email) {
+        const html=htmlSendMailOrder(
+            newOrder.orderCode,
+            newOrder.items,
+            newOrder.totalPrice, 
+            newOrder.finalPrice,
+            newOrder.discountValue, 
+            newOrder.shipping, 
+            newOrder.paymentMethod
+        )
+        sendEmailHelpers(newOrder.email,'Hello',html)
+    }
+
+
+    return {
+    status: 'OK',
+    message: 'Thành công ',
+    data: newOrder
     };
    
 }

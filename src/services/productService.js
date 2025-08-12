@@ -2,8 +2,6 @@
 const ProductDtb=require('../models/Product.Model');
 const paginationHelper=require ("../helper/pagination.js");
 const createError=require('../helper/createError');
-const util = require('util');
-const { group } = require('console');
 module.exports.createProduct= async (newProduct) =>{
 
     const {name}= newProduct;
