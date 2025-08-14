@@ -2,7 +2,7 @@ const express=require('express');
 const router=express.Router();
 const orderControllers=require('../controllers/order.controllers');
 const {validateOrder }=require("../validate/ValidateOrderAndCart");
-const {authUserMiddleware}=require("../middleware/auth.middleware")
+const {authUserMiddleware,authMiddleware}=require("../middleware/auth.middleware")
 
 
 
@@ -13,12 +13,13 @@ router.get("/my-order/:userId",authUserMiddleware,orderControllers.myOrder);
 
 router.get("/my-order/detail/:userId/:orderCode",authUserMiddleware,orderControllers.myOrderDetail);
 
-router.patch("/my-order/detail/change-status/:userId",authUserMiddleware,orderControllers.changeStatus);
-
-// router.get("/detail/:id",noteControllers.getDetail);  
+router.patch("/my-order/detail/cancelled/:userId",authUserMiddleware,orderControllers.cancelled);
 
 
-// router.delete("/delete/:id",authMiddleware, noteControllers.deleteNote);  
+router.get("/getall",authMiddleware,orderControllers.getAll);  
+
+router.patch("/update-status",authMiddleware,orderControllers.updateStatus);
+ 
 
   
 

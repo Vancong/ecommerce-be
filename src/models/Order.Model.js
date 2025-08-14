@@ -62,6 +62,10 @@ const OrderSchema = new mongoose.Schema(
       type: Date,
     },
 
+    updatedBy:{
+      type:String,
+    },
+
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'shipping', 'completed', 'cancelled','refunded','refund_pending'],

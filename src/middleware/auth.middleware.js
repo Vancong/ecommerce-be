@@ -1,8 +1,5 @@
 const jwt=require('jsonwebtoken');
 
-const dotenv=require('dotenv').config();
-console.log('ACCESS_TOKEN:', process.env.ACCESS_TOKEN);
-
 
 
 const authMiddleware= (req,res,next) =>{
@@ -44,7 +41,6 @@ const authUserMiddleware= (req,res,next) =>{
                 status: 'ERROR'
             })
         }
-        console.log(userId)
         if(user?.isAdmin||user?.id===userId) {
             req.user = user;
             next();

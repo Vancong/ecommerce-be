@@ -25,10 +25,28 @@ module.exports.myOrderDetail= asyncHandler( async(req,res) =>{
 })
 
 // [PATCH] /api/order/my-order/detail/change-status/:orderCode
-module.exports.changeStatus=asyncHandler( async(req,res) =>{
+module.exports.cancelled=asyncHandler( async(req,res) =>{
     const {orderCode,status}=req.body;
-    const response=await OrderService.changeStatus(orderCode,status);
+    const response=await OrderService.cancelled(orderCode,status);
     return res.status(200).json(response);
 
 }
 )
+
+
+// [GET] /api/order/getall
+module.exports.getAll=asyncHandler( async(req,res) =>{
+    const {limit,page,search,status,startDate,endDate,paymentMethod}=req.query;
+    const filters={
+        status,startDate,endDate,paymentMethod
+    }
+    const response=await OrderService.getAll(limit,page,search,filters);
+    return res.status(200).json(response);
+
+})
+
+module.exports.updateStatus=asyncHandler(async(req,res)=>{
+    const {orderCode,status,updatedBy}=req.body;
+    const response=await OrderService.updateStatus(orderCode,status,updatedBy);
+    return res.status(200).json(response);
+})

@@ -5,6 +5,8 @@ const createErro=require("../helper/createError");
 const VoucherService=require('../services/voucher.service')
 const sendEmailHelpers=require('../helper/sendEmail.helpers')
 const htmlSendMailOrder=require('../helper/HtmlSendMailOrder');
+const createError = require('../helper/createError');
+
 module.exports.create= async(data) =>{
     const orderCode= await generateOrderCode();
     data.orderCode=orderCode;
@@ -71,7 +73,7 @@ module.exports.myOrderDetail=async (orderCode) =>{
 
 }
 
-module.exports.changeStatus=async (orderCode,status) =>{
+module.exports.cancelled=async (orderCode,status) =>{
 
     const order=await OrderDtb.findOne({orderCode});
     if (!order) {
@@ -97,3 +99,75 @@ module.exports.changeStatus=async (orderCode,status) =>{
     
 }
 
+
+module.exports.getAll=async (limit,page,search,filters) =>{
+
+    const {status,startDate,endDate,paymentMethod}=filters;
+    const query={};
+    const populate = { path: 'items.product', select: 'name' }
+    if (search && search.trim() !== '') {
+        query.$or =  [
+            {orderCode:{ $regex: search}} ,
+            {phone: {$regex: search}},
+            {name: {$regex: search, $options:'i'}}
+        ]
+    }
+    if(status) {
+        query.status=status;
+    }
+    if(paymentMethod) {
+        query.paymentMethod=paymentMethod;
+    }
+
+    if (startDate && endDate) {
+      query.createdAt  = {
+        $gte: new Date(startDate),
+        $lt: new Date(new Date(endDate).getTime() + 24 * 60 * 60 * 1000) 
+      };
+    }
+    
+
+     return await paginationHelper({
+        model: OrderDtb,
+        page,
+        limit,
+        query,
+        populate
+     }
+     )
+
+    
+    
+}
+
+module.exports.updateStatus=async(orderCode,status,updatedBy) =>{
+    const checkOrder=await OrderDtb.findOne({
+        orderCode
+    })
+    if(!checkOrder) {
+        throw create(400,"Không tồn tại đơn hàng")
+    }
+    const valid = {
+      pending: ["confirmed", "cancelled"],
+      confirmed: ["shipping", "cancelled"],
+      shipping: ["completed", "refund_pending"],
+      completed: [],
+      cancelled: [],
+      refunded: [],
+      refund_pending: ["refunded"]
+    };
+
+    if(!valid[checkOrder.status].includes(status)){
+         throw createError(400,"Không thể chuyển sang trạng thái này" )
+    }
+
+    await OrderDtb.updateOne({
+        orderCode
+    },{status,updatedBy
+    })
+
+    return {
+        status:'OK'
+    }
+
+}
