@@ -1,4 +1,5 @@
 const CartDtb=require('../models/Cart.Model');
+const productDtb=require('../models/Product.Model')
 const createError=require("../helper/createError");
 module.exports.create= async(data) =>{
 
@@ -11,6 +12,14 @@ module.exports.create= async(data) =>{
         });
     } 
     else {
+
+        const product= await productDtb.findOne({
+            _id: productId
+        });
+        const checkInstock= product.sizes.find(size => size.volume===volume)
+        if(checkInstock.countInStock<quantity) {
+            throw createError(400,`Chỉ còn ${checkInstock.countInStock} sản phẩm`);
+        }
         const cartItem= cart.items.find((item) =>
             item.product.toString() === productId && item.volume === volume
         );
@@ -35,7 +44,7 @@ module.exports.create= async(data) =>{
 module.exports.getDetail=async (userId) =>{
 
     const cart = await  CartDtb.findOne({ user: userId })
-        .populate('items.product', 'name images selled slug');
+        .populate('items.product', 'name images selled slug sizes discount');
     
     return {
         status: 'OK',
@@ -48,6 +57,19 @@ module.exports.getDetail=async (userId) =>{
 module.exports.increaseQuantity= async(data) =>{
  
     const { userId, productId, volume } = data;
+
+    const product= await productDtb.findOne({_id:productId});
+    const sizes= product.sizes.find(item => item.volume===volume);
+
+    const cart= await CartDtb.findOne({user:userId});
+
+    const item=cart.items.find(item => item.product.toString()===productId&&item.volume===volume);
+
+    const newQuantity=item.quantity+1;
+
+    if(newQuantity>sizes.countInStock) {
+        throw createError(400,`Chỉ còn ${sizes.countInStock} sản phẩm`)
+    }
     const updatedCart = await CartDtb.findOneAndUpdate(
         {
         user: userId,

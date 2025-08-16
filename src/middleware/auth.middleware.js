@@ -38,17 +38,18 @@ const authUserMiddleware= (req,res,next) =>{
          if(err) {
             console.log(err.message)
             return res.status(404).json({
-                status: 'ERROR'
+                status: 'ERR'
             })
         }
         if(user?.isAdmin||user?.id===userId) {
             req.user = user;
             next();
+
         }
         else {
             return res.status(404).json({
                 message: ' Khong co quyen ',
-                status: 'ERROR'
+                status: 'ERR'
             })
         }
     })

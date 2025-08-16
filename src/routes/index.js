@@ -11,6 +11,7 @@ const voucherRouter=require('./voucher.router');
 const paymentRouter=require('./payment.router')
 const forgotPasswordsRouter=require('./forgot-password.router');
 const websiteInfoRouter=require('./WebSiteInfo.router')
+const statsRouter=require('./stats.router')
 const errorHandler =require('../middleware/errorHandler.middeware');
 
 module.exports.index= (app) =>{
@@ -26,6 +27,7 @@ module.exports.index= (app) =>{
     app.use('/api/payment',paymentRouter)
     app.use('/api/forgot-password',forgotPasswordsRouter)
     app.use('/api/website-info',websiteInfoRouter);
+    app.use('/api/stats',statsRouter)
     app.use(errorHandler);
 }
 

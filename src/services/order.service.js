@@ -1,4 +1,5 @@
 const OrderDtb=require('../models/Order.Model');
+const productDtb=require('../models/Product.Model');
 const generateOrderCode=require("../helper/generateOrderCode");
 const paginationHelper=require("../helper/pagination");
 const createErro=require("../helper/createError");
@@ -8,12 +9,60 @@ const htmlSendMailOrder=require('../helper/HtmlSendMailOrder');
 const createError = require('../helper/createError');
 
 module.exports.create= async(data) =>{
+
+    let totalPrice = 0;
+    let updateItems = [];
+    for (const item of data.items) {
+        const product = await productDtb.findOne({ _id: item.product });
+        if (!product) {
+            throw createError(404, 'Sản phẩm không tồn tại');
+        }
+        const size= product.sizes.find(size => size.volume===item.volume);
+
+        if (!size) {
+            throw createError(404, 'Dung tích sản phẩm không tồn tại');
+        }
+
+        const discountPrice=size.price*(1- ((product.discount||0) /100));
+        
+        totalPrice+=discountPrice*item.quantity;
+
+        updateItems.push({
+            product: item.product,
+            volume: item.volume,
+            quantity: item.quantity,
+            price: discountPrice
+        });
+
+
+        const res= await productDtb.updateOne({
+            _id: item.product,
+            "sizes.volume": item.volume,
+            "sizes.countInStock": {$gte:item.quantity}
+        },{ 
+            $inc: { 'sizes.$.countInStock': -item.quantity } 
+        })
+        if(res.modifiedCount===0) {
+            throw createError(400, 'Số lượng vượt quá tồn kho');
+        }
+     }
+
     const orderCode= await generateOrderCode();
     data.orderCode=orderCode;
+
     if(data.discountCode) {
         await VoucherService.check(data.user,data.discountCode,data.totalPrice);
     }
-    if(data.paymentMethod==='vnpay'||data.paymentMethod==='paypal') {
+
+    const shipping= totalPrice>=1000000?0: 28000;
+    data.shipping = shipping;
+    const finalPrice = totalPrice  + shipping;
+
+    data.finalPrice=finalPrice;
+    data.items=updateItems;
+    data.totalPrice=totalPrice;
+
+    if(data.paymentMethod==='paypal') {
         data.status='confirmed'
     }
 
@@ -84,11 +133,21 @@ module.exports.cancelled=async (orderCode,status) =>{
     }
 
     if(order.status==='confirmed'||order.status==='pending'){
-            await OrderDtb.updateOne({
+            const res= await OrderDtb.updateOne({
                 orderCode
             },{
                 status
             })
+            if(res.modifiedCount) {
+                for (const item of order.items) {
+                    await productDtb.updateOne({
+                        _id: item.product,
+                        "sizes.volume":item.volume
+                    },{
+                        $inc: {"sizes.$.countInStock": item.quantity}
+                    })                
+                }
+            }
     }
     
     return {
@@ -135,8 +194,6 @@ module.exports.getAll=async (limit,page,search,filters) =>{
         populate
      }
      )
-
-    
     
 }
 
@@ -159,6 +216,28 @@ module.exports.updateStatus=async(orderCode,status,updatedBy) =>{
 
     if(!valid[checkOrder.status].includes(status)){
          throw createError(400,"Không thể chuyển sang trạng thái này" )
+    }
+
+    if(status=='cancelled'){
+        for (const item of checkOrder.items) {
+            await productDtb.updateOne({
+                _id: item.product,
+                "sizes.volume": item.volume
+            },{
+                $inc: {"sizes.$.countInStock":item.quantity }
+            })
+        }
+    }
+
+    if(checkOrder.status === 'shipping' &&status==='completed'){
+        for (const item of checkOrder.items) {
+            await productDtb.updateOne({
+                _id: item.product,
+                "sizes.volume": item.volume
+            },{
+                $inc: {"sizes.$.sold":item.quantity }
+            })
+        }
     }
 
     await OrderDtb.updateOne({
