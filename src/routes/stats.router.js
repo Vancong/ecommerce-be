@@ -4,9 +4,6 @@ const statsControllers=require('../controllers/stats.controllers');
 const {authMiddleware}=require("../middleware/auth.middleware");
 
 
-
-  
-
-// router.get("/get-all", statsControllers.getAll);  
+router.get("/revenue", statsControllers.revenue);  
 
 module.exports=router;

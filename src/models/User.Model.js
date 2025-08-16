@@ -11,7 +11,7 @@ const userSchema= new mongoose.Schema(
         isActive: {type: Boolean,default:true}
     },
     {
-        timestamp:true
+        timestamps:true
     }
 )
 
