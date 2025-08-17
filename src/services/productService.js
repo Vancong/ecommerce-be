@@ -102,13 +102,17 @@ module.exports.deleteManyProduct=async (ids) =>{
 
 module.exports.getAllProduct= async (limit,page = 1,key,value,filters={},isAdmin) =>{
 
-    const sort = {};
-    if (key && value){
-        sort[key] = value;
+    let sort = 'name';
+    if (key && value) {
+        if (key === 'price') {
+            sort= { 'sizes.price': Number(value) }; 
+        } else {
+            sort= { [key]: Number(value) };
+        }
     }
-    else sort.name = 'asc';
 
     let query = {};
+
     
     const checkIsAdmin=isAdmin==='true';
     if(!checkIsAdmin) {
@@ -120,6 +124,10 @@ module.exports.getAllProduct= async (limit,page = 1,key,value,filters={},isAdmin
     if (filters.brands) {
         const brandsArr = filters.brands.split(',');
         query.brand = { $in: brandsArr };
+    }
+
+    if(filters.discount) {
+        query.discount={$gt:0}
     }
 
 

@@ -51,7 +51,7 @@ module.exports.getUserFavorite=async (userId) =>{
 
     const checkFavorite = await FavoriteDtb.find({
         user: userId
-    }).populate('product','name images selled slug')
+    }).populate('product','name images sizes selled slug')
    
     const productIds=checkFavorite.map(fa => fa.product)
     return {

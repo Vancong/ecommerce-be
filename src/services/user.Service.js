@@ -3,7 +3,8 @@ const UserDtb = require('../models/User.Model');
 const bcrypt=require('bcrypt');
 const JwtService=require('./JwtService');
 const paginationHelper=require("../helper/pagination");
-const createError=require('../helper/createError')
+const createError=require('../helper/createError');
+const { updateOne, listenerCount } = require('../models/Favorite.Model');
 module.exports.createUser = async (newUser) => {
     const checkUser= await UserDtb.findOne({
         email:newUser.email
@@ -13,6 +14,8 @@ module.exports.createUser = async (newUser) => {
     if(checkUser!==null) {
         throw createError(409,'Email đã tồn tại');
     }
+
+    
     
     const hash= await bcrypt.hash(newUser.password, 10);
     newUser.password=hash;
@@ -152,3 +155,32 @@ module.exports.getDetailUser= async (userId) =>{
 
 }
 
+module.exports.ChangePassword= async (data) =>{
+
+    let {userId,oldPassword,newPassword,cfPassword}=data;
+    const checkUser=await UserDtb.findOne({
+        _id: userId
+    })
+    if(!checkUser) {
+        throw createError(404,'khong tồn tại tài khoản này');
+    }
+    const checkPass= await bcrypt.compare(oldPassword,checkUser.password)
+
+    if(!checkPass){
+        throw createError(400,'Mật khẩu cũ không đúng');
+    }
+
+    if(newPassword!==cfPassword) {
+         throw createError(400,'Mật khẩu xác nhận không khớp');
+    }
+    newPassword= await bcrypt.hash(newPassword,10);
+
+    await UserDtb.updateOne({
+        _id:userId
+    },{password: newPassword})
+    return {
+        status: 'OK',
+        message: 'Thanh cong',
+    }
+
+}

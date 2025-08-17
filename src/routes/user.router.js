@@ -11,6 +11,8 @@ router.post('/sign-in',validateLogin,userControllers.loginUser);
 
 router.post('/log-out',userControllers.logoutUser);
 
+router.post('/change-password/:userId',authUserMiddleware,userControllers.ChangePassword);
+
 router.put('/update-user/:userId',uploadImg.single('avt'),
  authUserMiddleware,validateUpdateUser, userControllers.updateUser);
 

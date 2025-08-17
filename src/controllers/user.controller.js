@@ -100,3 +100,9 @@ module.exports.refreshToken= asyncHandler (async (req,res) =>{
     
 })
 
+// [POST] /api/user/change-password
+module.exports.ChangePassword= asyncHandler (async (req,res) =>{
+        const response=await userService.ChangePassword(req.body);
+        return res.status(200).json(response);
+    
+})
