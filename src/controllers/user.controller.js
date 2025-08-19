@@ -2,6 +2,10 @@ const userService=require('../services/user.Service');
 const JwtService=require("../services/JwtService");
 const asyncHandler =require('express-async-handler')
 const createErro=require("../helper/createError");
+
+const isProduction = process.env.NODE_ENV === "production";
+
+
 module.exports.index= (req,res) => {
     console.log('ok');
 }
@@ -21,8 +25,8 @@ module.exports.loginUser= asyncHandler( async (req,res) =>{
     const {refresh_token,...newUser}=user;
     res.cookie('refresh_token',refresh_token,{
         httpOnly: true,
-        secure: true,
-        sameSite: 'Strict',
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
         maxAge: 365 * 24 * 60 * 60 * 1000 
     })
     return res.status(200).json(newUser);

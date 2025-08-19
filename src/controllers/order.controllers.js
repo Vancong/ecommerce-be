@@ -11,15 +11,16 @@ module.exports.create= asyncHandler( async(req,res) =>{
 
 // [GET] /api/order/my-order
 module.exports.myOrder=asyncHandler(async(req,res) =>{
-    const { page = 1, limit = 5 } = req.query;
-    const response=await OrderService.myOrder(req.params.userId,page,limit);
+    const { page = 1, limit = 5,status } = req.query;
+    const filters={status}
+    const response=await OrderService.myOrder(req.params.userId,page,limit,filters);
     return res.status(200).json(response);
 
 })
 
 // [GET] /api/order/my-order/detail/:orderCode
 module.exports.myOrderDetail= asyncHandler( async(req,res) =>{
-
+        
         const orderCode=req.params.orderCode;
         const response=await OrderService.myOrderDetail(orderCode);
         return res.status(200).json(response);

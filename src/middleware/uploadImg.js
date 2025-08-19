@@ -1,7 +1,8 @@
 const multer = require('multer');
 const { createStorage } = require("../helper/cloudinary")
 
-const typesFile = ['image/jpeg', 'image/png', 'image/jpg']; 
+const typesFile = ['image/jpeg', 'image/png', 'image/jpg','image/webp']; 
+
 
 const fileFilter = (req, file, cb) => {
   if (typesFile.includes(file.mimetype)) {

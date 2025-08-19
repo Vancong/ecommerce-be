@@ -33,7 +33,6 @@ module.exports.createUser = async (newUser) => {
 module.exports.loginUser = async (dataUser) => {
 
     const user= await UserDtb.findOne({email: dataUser.email})
-    const passwordInut= await bcrypt.compare(dataUser.password,user.password);
 
     if (!user) {
         throw createError(404, 'Người dùng không tồn tại');
@@ -41,6 +40,7 @@ module.exports.loginUser = async (dataUser) => {
     if (!user.isActive) {
       throw createError(403, 'Tài khoản đã bị khoá hoặc chưa được kích hoạt!');
     }
+    const passwordInut= await bcrypt.compare(dataUser.password,user.password);
 
     if (!passwordInut) {
         throw createError(400,'Mật khẩu không chính xác');
@@ -119,7 +119,7 @@ module.exports.getAllUser= async (limit,page = 1,key,value,search='') =>{
     if (key && value){
         sort[key] = value;
     }
-    else sort.name = 'asc';
+    else sort.name = -1;
 
     let query = {};
     if (search && search.trim() !== '') {

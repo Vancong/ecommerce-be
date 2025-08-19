@@ -102,6 +102,7 @@ module.exports.deleteManyProduct=async (ids) =>{
 
 module.exports.getAllProduct= async (limit,page = 1,key,value,filters={},isAdmin) =>{
 
+
     let sort = 'name';
     if (key && value) {
         if (key === 'price') {
@@ -128,6 +129,15 @@ module.exports.getAllProduct= async (limit,page = 1,key,value,filters={},isAdmin
 
     if(filters.discount) {
         query.discount={$gt:0}
+    }
+
+    if(filters.status) {
+        if(filters.status==='true'){
+            query.isActive=true;
+        }
+        else if(filters.status==='false'){
+            query.isActive=false
+        }
     }
 
 

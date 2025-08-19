@@ -10,7 +10,6 @@ const WebSiteInfoSchema= new mongoose.Schema({
     },
     socialLinks: {
       facebook: { type: String },
-      instagram: { type: String },
       tiktok: { type: String },
       zalo: { type: String },
     },

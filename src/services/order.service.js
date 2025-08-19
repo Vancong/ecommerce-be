@@ -91,14 +91,16 @@ module.exports.create= async(data) =>{
    
 }
 
-module.exports.myOrder=async (userId,page,limit) =>{
-
+module.exports.myOrder=async (userId,page,limit,filters) =>{
+    let query={user: userId};
+    if(filters.status) query.status=filters.status;
+    console.log(filters)
     const myOrder = await paginationHelper({
         model: OrderDtb,
         page,
         limit,
         sort: { createdAt: -1 },
-        query: { user: userId }
+        query
     });
     return {
         status:'OK',

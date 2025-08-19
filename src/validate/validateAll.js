@@ -97,10 +97,10 @@ const validateSignup= async (req,res,next) =>{
     if (checkUser) {
       return res.status(400).json({ message: "Email đã tồn tại" });
     }
-    if(req.body.password.length<6||req.body.confirmPassword<6) {
+    if(req.body.password.length<6||req.body.confirmPassword.length<6) {
         return res.status(400).json({ message: "Mật khẩu phải 6 kí tự" });
     }
-     if(req.body.password.length!==req.body.confirmPassword) {
+     if(req.body.password!==req.body.confirmPassword) {
         return res.status(400).json({ message: "Mật khẩu không trùng" });
     }
     return validate(signupSchema)(req, res, next);  

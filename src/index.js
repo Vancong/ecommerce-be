@@ -7,7 +7,15 @@ const app=express();
 const cors=require('cors');
 const cookieParser= require('cookie-parser')
 
-app.use(cors());
+const isProduction = process.env.NODE_ENV === "production";
+console.log(isProduction)
+app.use(cors({
+  origin: isProduction 
+    ? "linkonl" 
+    : "http://localhost:3000",
+  credentials: true,
+}));
+
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit:'50mb'}));
 const PORT=process.env.PORT||3001;
