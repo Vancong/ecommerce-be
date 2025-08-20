@@ -7,7 +7,7 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-
+const allowedFormats = ["image/jpeg", "image/png", "image/webp"];
 
 const createStorage = (folderName) =>
   new CloudinaryStorage({

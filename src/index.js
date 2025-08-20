@@ -8,10 +8,10 @@ const cors=require('cors');
 const cookieParser= require('cookie-parser')
 
 const isProduction = process.env.NODE_ENV === "production";
-console.log(isProduction)
+
 app.use(cors({
   origin: isProduction 
-    ? "linkonl" 
+    ? "https://thegioinuochoa.netlify.app" 
     : "http://localhost:3000",
   credentials: true,
 }));
