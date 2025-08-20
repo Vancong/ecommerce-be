@@ -16,6 +16,12 @@ const VoucherSchema= new mongoose.Schema(
         usageLimit: { type: Number, default: null }, 
         usageCount: { type: Number, default: 0 }, 
         userLimit: {type: Number },
+        usedBy: [
+            {
+                userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
+                count: { type: Number, default: 1 }, 
+            },
+        ],
         isActive:{type: Boolean,default:true}
     },
     {

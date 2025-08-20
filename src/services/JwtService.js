@@ -9,7 +9,6 @@ module.exports.genneralAccessToken= (payload) =>{
         ...payload
     }
     , process.env.ACCESS_TOKEN,{expiresIn:'1h'})
-    console.log('Access token login:', accessToken);
     return accessToken
 }
 

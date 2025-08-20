@@ -7,7 +7,7 @@ const VoucherService=require('../services/voucher.service')
 const sendEmailHelpers=require('../helper/sendEmail.helpers')
 const htmlSendMailOrder=require('../helper/HtmlSendMailOrder');
 const createError = require('../helper/createError');
-
+const VoucherDtb=require('../models/Voucher.Model')
 module.exports.create= async(data) =>{
 
     let totalPrice = 0;
@@ -51,8 +51,16 @@ module.exports.create= async(data) =>{
     data.orderCode=orderCode;
 
     if(data.discountCode) {
-        await VoucherService.check(data.user,data.discountCode,data.totalPrice);
+        const voucherRes = await VoucherService.check(
+                data.user,
+                data.discountCode,
+                totalPrice
+        );
+        
+         totalPrice -= voucherRes.data.discountValue;
+        
     }
+    
 
     const shipping= totalPrice>=1000000?0: 28000;
     data.shipping = shipping;
@@ -82,6 +90,25 @@ module.exports.create= async(data) =>{
         sendEmailHelpers(newOrder.email,'Hello',html)
     }
 
+
+    if (data.discountCode) {
+        const voucher = await VoucherDtb.findOne({ code: data.discountCode });
+
+        const userUsed = voucher.usedBy.find(userby=> userby.userId.toString() === data.user);
+
+        if (userUsed) {
+            await VoucherDtb.updateOne(
+                { _id: voucher._id, 'usedBy.userId': data.user },
+                { $inc: { 'usedBy.$.count': 1, usageCount: 1 } }
+            );
+        } else {
+            await VoucherDtb.updateOne(
+                { _id: voucher._id },
+                { $push: { usedBy: { userId: data.user, count: 1 } }, $inc: { usageCount: 1 } }
+            );
+        }
+    
+   }
 
     return {
     status: 'OK',

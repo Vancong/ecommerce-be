@@ -88,39 +88,45 @@ module.exports.deleteMany= async(ids) =>{
 }
 
 module.exports.check= async(userId,code,totalPrice) =>{
-
     const voucher= await VoucherDtb.findOne({
-        code:code,
+        code:code?.trim(),
         isActive:true
     })
 
-    if(!voucher||new Date(voucher.endDate)< new Date()||voucher.minOrderValue>totalPrice) {
-        throw createError(400,'Mã giảm giá không hợp lệ')
-   
+    if (!voucher) {
+     throw createError(400, 'Mã giảm giá không tồn tại');
+    }
+
+    const endDate = new Date(voucher.endDate);
+    endDate.setHours(23, 59, 59, 999);
+
+    if (endDate < new Date() || voucher.minOrderValue > totalPrice) {
+        throw createError(400, 'Mã giảm giá không hợp lệ');
+    }
+
+    if (totalPrice < voucher.minOrderValue) {
+      throw new Error(`Đơn hàng phải tối thiểu ${voucher.minOrderValue}`);
     }
 
     if (voucher.startDate && new Date(voucher.startDate) > new Date()) {
         throw createError(400, 'Mã giảm giá chưa đến thời gian sử dụng');
     }
 
-    const usageCountByUser = await OrderDtb.countDocuments({
-        userId:userId,
-        discountCode: code,
-        status: { $in: ['confirmed', 'shipping', 'completed'] }
-    })
+    const userUsed = voucher.usedBy.find(us => us.userId.toString() === userId);
+    const usedCount = userUsed ? userUsed.count : 0;
 
-    if(voucher.userLimit&& usageCountByUser>= voucher.userLimit) {
+    if(voucher.userLimit&& voucher.userLimit>=usedCount) {
          throw createError(400,'Bạn đã dùng quá số lần')
     }
 
-      
 
     return {
         status: 'OK',
         message: ' thành công',
         data:{
-            iSuccess:true,
-            voucher: voucher
+            isSuccess:true,
+            voucher: voucher,
+            discountValue: voucher.discountValue
         }
     }
 }

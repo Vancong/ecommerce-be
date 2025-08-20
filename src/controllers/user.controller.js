@@ -23,6 +23,7 @@ module.exports.loginUser= asyncHandler( async (req,res) =>{
 
     const user=await userService.loginUser(req.body); 
     const {refresh_token,...newUser}=user;
+
     res.cookie('refresh_token',refresh_token,{
         httpOnly: true,
         secure: isProduction,
